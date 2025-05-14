@@ -6,15 +6,17 @@ import java.io.InputStreamReader;
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String input = br.readLine();
+        StringBuilder sb = new StringBuilder(br.readLine());
         String[] s = {"c=", "c-", "dz=", "d-", "lj", "nj", "s=", "z="};
 
         for(String str : s){
-            input = input.replace(str, "1");
+            int idx = sb.indexOf(str);
+
+            while(idx != -1){
+                sb.replace(idx, idx + str.length(), "1");
+                idx = sb.indexOf(str);
+            }
         }
-
-        System.out.println(input.length());
-
-
+        System.out.println(sb.length());
     }
 }
