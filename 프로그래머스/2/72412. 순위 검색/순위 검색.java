@@ -1,78 +1,90 @@
 import java.util.*;
-import java.util.function.Consumer;
 
-public class Solution {
-    private void forEachKey(int index, String prefix, String[] tokens,
-                            Consumer<String> action) {
-        if (index == tokens.length - 1) {
-            action.accept(prefix);
-            return;
-        }
-
-        forEachKey(index + 1, prefix + tokens[index], tokens, action);
-        forEachKey(index + 1, prefix + "-", tokens, action);
-    }
-
-    private Map<String, List<Integer>> buildScoresMap(String[] info) {
-        Map<String, List<Integer>> scoresMap = new HashMap<>();
-
-        for (String s : info) {
-            String[] tokens = s.split(" ");
-            int score = Integer.parseInt(tokens[tokens.length - 1]);
-            forEachKey(0, "", tokens, key -> {
-                scoresMap.putIfAbsent(key, new ArrayList<>());
-                scoresMap.get(key).add(score);
-            });
-        }
-
-        for (List<Integer> list : scoresMap.values()) {
+class Solution {
+    
+    Map<String, List<Integer>> map = new HashMap<>();
+    String[] info; 
+    String[] query;
+    
+    public int[] solution(String[] info, String[] query) {
+        
+        this.info = info;
+        this.query = query;
+        buildScoresMap();
+        
+        for(var list : map.values()){
             Collections.sort(list);
         }
-
-        return scoresMap;
+        
+        int[] answer = sol();
+    
+        return answer;
     }
+    
+    int[] sol(){
+        
+        int[] answer = new int[query.length];
+        int idx = 0;
+        for(String s : query){
+            String[] splited = s.split(" and ");
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < splited.length - 1; i++){
+                sb.append(splited[i]);
+            }
+            String[] last = splited[splited.length-1].split(" ");
+            sb.append(last[0]);
 
-    private int binarySearch(int score, List<Integer> scores) {
-        int start = 0;  // inclusive
-        int end = scores.size() - 1;  // inclusive
-
-        while (end > start) {
+            answer[idx++] = findNum(sb.toString(), Integer.parseInt(last[1]));
+            // System.out.println(sb);
+            
+        }
+        
+        return answer;
+        
+    }
+    
+    int findNum(String key, int num){
+        
+        List<Integer> list = map.get(key);
+        if (list == null) return 0;
+        int start = 0;
+        int end = list.size();
+        
+        while(start < end){
             int mid = (start + end) / 2;
-
-            if (scores.get(mid) >= score) {
+            
+            if(list.get(mid) >= num){
                 end = mid;
-            } else {
+            }
+            else {
                 start = mid + 1;
             }
+            
         }
-
-        if (scores.get(start) < score) {
-            return start+1;
-        }
-        return start;
+        // System.out.print(key + " " + start + " " + list.size() + " ");
+        // System.out.print(list.toString());
+        // System.out.println(list.size() - start);
+        return list.size() - start;
+        
     }
-
-    private int count(String query, Map<String, List<Integer>> scoresMap) {
-        String[] tokens = query.split(" (and )?");
-
-        String key
-                = String.join("", Arrays.copyOf(tokens, tokens.length - 1));
-
-        if (!scoresMap.containsKey(key)) return 0;
-        List<Integer> scores = scoresMap.get(key);
-
-        int score = Integer.parseInt(tokens[tokens.length - 1]);
-
-        return scores.size() - binarySearch(score, scoresMap.get(key));
+    
+    
+    void buildScoresMap(){       
+        for(String s : info){
+            String[] ss = s.split(" ");
+            forEachKey(ss, 0, "");
+        }        
     }
-
-    public int[] solution(String[] info, String[] query) {
-        Map<String, List<Integer>> scoresMap = buildScoresMap(info);
-
-        int[] answer = new int[query.length];
-        for (int i = 0; i < answer.length; i++) {
-            answer[i] = count(query[i], scoresMap);
+    
+    void forEachKey(String[] s, int idx, String currentS){
+        if(idx == s.length - 1){
+            List<Integer> list = map.getOrDefault(currentS, new ArrayList<>());
+            list.add(Integer.parseInt(s[s.length-1]));
+            map.put(currentS, list);
+            return;
         }
-        return answer;
+        
+        forEachKey(s, idx+1, currentS + s[idx]);
+        forEachKey(s, idx+1, currentS + "-");
     }
 }
