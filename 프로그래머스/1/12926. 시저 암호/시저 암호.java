@@ -1,17 +1,21 @@
+import java.util.*;
+
 class Solution {
     public String solution(String s, int n) {
-        
-        StringBuilder builder = new StringBuilder();
-        for(char c : s.toCharArray()){
-            if(!Character.isAlphabetic(c)) {
-                builder.append(c);
-                continue;
-            }
-            char offset = Character.isUpperCase(c) ? 'A' : 'a';
-            char len = ('z' - 'a' + 1);
-            builder.append((char)((c - offset + n) % len + offset));
+        String answer = "";
+        char[] arr = s.toCharArray();
+        for(int i = 0; i < s.length(); i++){
+            char c = arr[i];
+            if(!Character.isAlphabetic(c)) continue;
+            arr[i] = push(n, c);
         }
         
-        return builder.toString();
+        return String.valueOf(arr);
+    }
+    char push(int n, char c){
+        if(Character.isLowerCase(c)) {
+            return (char)(((c - 'a' + n) % ('z' - 'a' + 1)) + 'a');
+        }
+        return (char)(((c - 'A' + n) % ('Z' - 'A' + 1)) + 'A');
     }
 }
